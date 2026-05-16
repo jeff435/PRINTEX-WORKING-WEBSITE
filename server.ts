@@ -38,6 +38,18 @@ try {
     );
   `);
   console.log("Database tables initialized/verified");
+  
+  // Ensure admin user exists with a known password
+  const adminPasswordHash = bcrypt.hashSync('admin123', 10);
+  const admin = db.prepare("SELECT * FROM users WHERE email = ?").get('admin');
+  if (admin) {
+    db.prepare("UPDATE users SET password = ? WHERE email = ?").run(adminPasswordHash, 'admin');
+    console.log("Admin password updated");
+  } else {
+    // Should have been created by seed if exists, but just in case
+    db.prepare("INSERT INTO users (id, fullName, email, password, role) VALUES (?, ?, ?, ?, ?)").run('usr_admin', 'Admin User', 'admin', adminPasswordHash, 'admin');
+    console.log("Admin user created");
+  }
 } catch (err) {
   console.error("Database initialization error:", err);
 }
@@ -83,21 +95,27 @@ async function startServer() {
 
   app.post("/api/auth/signin", async (req, res) => {
     const { email, password } = req.body;
+    console.log("Signin attempt for:", email);
     if (!email || !password) {
+      console.log("Signin missing email/password");
       return res.status(400).json({ error: "Missing email or password" });
     }
     try {
       const user: any = db.prepare("SELECT * FROM users WHERE email = ?").get(email.toLowerCase());
+      console.log("User found:", !!user);
       if (!user) {
         return res.status(400).json({ error: "Invalid email or password" });
       }
       
-      const isValid = await bcrypt.compare(password, user.password);
+      console.log("Comparing password for user:", user.id);
+      const isValid = bcrypt.compareSync(password, user.password);
+      console.log("Password is valid:", isValid);
       if (!isValid) {
         return res.status(400).json({ error: "Invalid email or password" });
       }
       
       const token = jwt.sign({ id: user.id, email: user.email, fullName: user.fullName }, JWT_SECRET, { expiresIn: "7d" });
+      console.log("Signin successful");
       res.json({ success: true, token, user: { id: user.id, email: user.email, fullName: user.fullName, role: user.role } });
     } catch (error: any) {
       console.error("Signin error:", error);
