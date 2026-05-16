@@ -1,0 +1,6 @@
+{
+  "name": "Printex Engineers Limited — Inventory System",
+  "description": "Professional inventory management system for Printex Engineers Limited, featuring stock tracking, invoice generation, and an AI-powered assistant.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
