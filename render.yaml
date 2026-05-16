@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: printex-backend
+    env: node
+    region: oregon
+    buildCommand: npm install
+    startCommand: node server.js
+    healthCheckPath: /api/health
+    envVars:
+      - key: PORT
+        value: 3000
+      - key: NODE_ENV
+        value: production
+      - key: MPESA_CONSUMER_KEY
+        sync: false
+      - key: MPESA_CONSUMER_SECRET
+        sync: false
+      - key: MPESA_PASSKEY
+        sync: false
+      - key: MPESA_TILL_NUMBER
+        value: "4977712"
+      - key: MPESA_SHORTCODE
+        value: "4977712"
+      - key: MPESA_CALLBACK_URL
+        sync: false
+      - key: MPESA_SANDBOX
+        value: "true"
